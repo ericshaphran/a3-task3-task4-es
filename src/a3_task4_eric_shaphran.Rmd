@@ -39,6 +39,7 @@ ggplot(data = purple_naples_2010, aes(x = size, fill = treatment)) +
   theme(legend.position = "none") +
   facet_wrap(~treatment)
 ```
+
 The urchins in the annual treatment appear to be slightly larger than the urchins in the control group. The urchins from both treatments are similarly distributed but it is hard to establish a normal distribution pattern from the graphs.
 
 ```{r}
@@ -47,6 +48,7 @@ ggplot(data = purple_naples_2010, aes(sample = size)) +
   geom_qq() +
   facet_wrap(~treatment)
 ```
+
 Taking into account the fact that the urchin sizes are rounded to the nearest half centimeter, the QQ plots for both treatments appear to be fairly linear and, thus, suggest a normal distribution.
 
 ### Part 3. Descriptive statistics
