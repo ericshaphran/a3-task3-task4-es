@@ -86,7 +86,7 @@ tot_p_urchins # View table
 # Exploratory graph of purple urchin data
 ggplot(data = tot_p_urchins, aes(x = year, y = n, fill = site_full)) +
   geom_col() +
-  labs(x = "Year", y = "Number of Purple Urchins", title = "Purple Urchins Along Santa Barbara Coast") +
+  labs(x = "Year", y = "Number of Purple Urchins", title = "Purple Urchins Along Santa Barbara Coast (SHAPHRAN") +
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
   facet_wrap(~site_full)
 ```
