@@ -1,0 +1,76 @@
+---
+title: "Naples Reef (January 2010) purple urchins"
+author: "Eric Shaphran"
+date: "11/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(lubridate)
+```
+
+### Part 1. Data wrangling
+```{r}
+purple_naples <- read_csv(here("data", "urchins.csv")) %>% # Read in urchin data with 'here()'
+  clean_names() %>% # Convert column names to lower snake case
+  mutate(date_new = mdy(date)) %>% # Convert date column to 'Date' class
+  mutate(year = year(date_new)) %>% # Add year column
+  mutate(month = month(date_new)) %>% # Add month column
+  mutate(site_full = case_when( # Create new column called site_full containing full names of sites
+    site == "NAPL" ~ "Naples Reef",
+    site == "AQUE" ~ "Arroyo Quemado Reef",
+    site == "CARP" ~ "Carpinteria Reef",
+    site == "MOHK" ~ "Mohawk Reef",
+    site == "IVEE" ~ "Isla Vista Reef"))
+
+purple_naples_2010 <- purple_naples %>% # Start with purple_naples
+  filter(site_full == "Naples Reef", common_name == "Purple Urchin", year == 2010, month == 1) # Filter only purple urchins from Naples Reef in January 2010
+
+```
+### Part 2. Comparing exploratory graphs
+```{r}
+# Histogram comparing treatments
+ggplot(data = purple_naples_2010, aes(x = size, fill = treatment)) +
+  geom_histogram(bins = 15) +
+  theme(legend.position = "none") +
+  facet_wrap(~treatment)
+```
+The urchins in the annual treatment appear to be slightly larger than the urchins in the control group. The urchins from both treatments are similarly distributed but it is hard to establish a normal distribution pattern from the graphs.
+
+```{r}
+# QQ plot comparing treatments
+ggplot(data = purple_naples_2010, aes(sample = size)) +
+  geom_qq() +
+  facet_wrap(~treatment)
+```
+Taking into account the fact that the urchin sizes are rounded to the nearest half centimeter, the QQ plots for both treatments appear to be fairly linear and, thus, suggest a normal distribution.
+
+### Part 3. Descriptive statistics
+```{r}
+purple_naples_stats <- purple_naples_2010 %>% # Start with purple_naples_2010
+  group_by(treatment) %>% # Calculate mean, standard deviation, and sample size for purple_naples_2010
+  summarize(mean_urch_size = mean(size),
+            sd_urch_size = sd(size),
+            n = n())
+
+purple_naples_stats # Show statistics table
+```
+### Part 4. Two-sample t-test
+```{r}
+annual_sample <- purple_naples_2010 %>% 
+  filter(treatment == "ANNUAL") %>% # Create vector with observations from annual treatment only
+  pull(size)
+
+control_sample <- purple_naples_2010 %>%
+  filter(treatment == "CONTROL") %>% # Create vector with observations from control treatment only
+  pull(size)
+
+t.test(x = annual_sample, y = control_sample)
+3.916667-3.725806
+```
+
+The relatively small difference between the means of the two samples (0.19cm) suggests that the two samples could have been taken from populations with the same mean. However, because the sample sizes are relatively small(60 and 62) and the standard deviations are relatively large (0.97cm and 0.87cm), it is difficult to determine with a high degree of certainty whether the samples were taken from populations with the same mean. The p-value of .2536 means that if both samples came from populations with the exact same mean, then there is a 25.36% chance that two other randomly picked samples could have had means farther apart than 0.19cm from these samples.
